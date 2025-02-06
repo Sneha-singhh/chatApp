@@ -1,7 +1,6 @@
 import User from "../models/user.models.js";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
-
 import bcrypt from "bcrypt";
 
 export const signup= async(req,res)=>{
@@ -18,9 +17,8 @@ export const signup= async(req,res)=>{
         }
         
         const user = await User.findOne({email});
-        if(user){
+        if(user)
             return res.status(400).json({message:"user already exist"});
-        }
 
         const hashPassword = await bcrypt.hash(password,10);
 
@@ -47,30 +45,28 @@ export const signup= async(req,res)=>{
         }
 
     } catch (error) {
-        console.log("Error : "+ error.message);
+        console.log("Error in signup controller ",error.message);
         return res.status(500).json({message:"internal server error"});
     }
 };
 
 export const login = async (req,res)=>{
+    const {email,password} = req.body;
     try {
-        const {email,password} = req.body;
         const user = await User.findOne({email});
         const isMatch = await bcrypt.compare(password,user.password)
         if(!user || !isMatch){
             return res.status(400).json({message:"invalid credentials"})
         }
-        else{
-            generateToken(user._id,res)
-            return res.status(200).json({message:"Login Successfull", user:{
+            generateToken(user._id,res);
+             res.status(200).json({message:"Login Successfully", user:{
                 _id: user._id,
                 fullname: user.fullname,
                 email: user.email,
                 profilePic : user.profilePic
             }})
-        }
     } catch (error) {
-        console.log("Error : ",error.message);
+        console.log("Error in login controller : ",error.message);
         return res.status(500).json({message:"internal server error"})
     }
 };
@@ -95,7 +91,7 @@ export const updateProfile = async (req,res)  => {
         }
 
         const uploadResponse = await cloudinary.uploader.upload(profilePic)
-        const updatedUser = await User.findByIdAndUpdate(userId,{profilePic:uploadResponse.secure_url},{new:true})
+        const updatedUser = await User.findByIdAndUpdate(userId,{profilePic:uploadResponse.secure_url},{new:true});
 
         res.status(200).json(updatedUser)
     } catch (error) {
@@ -107,10 +103,10 @@ export const updateProfile = async (req,res)  => {
 
 export const checkAuth = (req,res) =>{
     try {
-        return res.status(200).json(req.user);
+        res.status(200).json(req.user);
     } catch (error) {
-        console.log("Error in checkAuth controller : ", error);
+        console.log("Error in checkAuth controller : ", error.message);
         res.status(500).json({message : "internal server error"})
         
     }
-}
+};
