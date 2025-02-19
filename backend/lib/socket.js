@@ -7,13 +7,12 @@ const server = http.createServer(app);
 
 const io = new Server(server,{
     cors : {
-        origin : ["http://localhost:5173"]
+        origin : [
+            "http://localhost:5173",
+            "https://chat-app-phes.onrender.com"
+        ]
     }
 });
-
-export function getReceiverSocketId(userId) {
-    return userSocketMap[userId];
-  }
 
 // used to store online users
 const userSocketMap = {};
@@ -35,6 +34,8 @@ io.on("connection", (socket)=>{
     
 });
 
-
+export function getReceiverSocketId(userId) {
+    return userSocketMap[userId];
+  }
 
 export {io, app, server};
