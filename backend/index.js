@@ -9,6 +9,8 @@ import { app, server } from "./lib/socket.js";
 
 import path from "path";
 
+dotenv.config();
+
 // const app = express();
 app.use(express.json({limit : '100mb'}));
 app.use(cookieParser());
@@ -18,30 +20,32 @@ app.use(cors({
 }
 ));
 
-dotenv.config();
-
 const PORT = process.env.PORT || 4000;
 const URI = process.env.MONGODB_URI
 
-const __dirname = path.resolve();
-
 // connect to mongodb
-try {
-    mongoose.connect(URI,{
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    });
-    console.log("mongodb connected");
-    
-} catch (error) {
-    console.log("Error : ", error);
-    
+async function connectDB() {
+    try {
+        mongoose.connect(URI,{
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log("mongodb connected");
+        
+    } catch (error) {
+        console.log("Error : ", error.message);
+        process.exit(1);  //exit if conn fails
+        
+    }
 }
+
+connectDB();
 
 // routes
 app.use("/api/auth",authRoutes)
 app.use("/api/messages",messageRoutes)
 
+const __dirname = path.resolve();
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../frontend/dist")));
   
